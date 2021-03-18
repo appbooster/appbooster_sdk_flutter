@@ -1,0 +1,15 @@
+name: appbooster_sdk_flutter
+description: Mobile framework for Appbooster platform
+version: 0.0.1
+author:
+homepage:
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
