@@ -4,25 +4,40 @@ class _Client {
   static const _domain = 'api.appbooster.com';
   static const _endpoint = '/api/mobile/experiments';
 
-  Future<Iterable> loadExperiments({
+  Map<String, String> _headers;
+
+  _Client({
+    @required String sdkToken,
     @required String appId,
-    @required String jwt,
-    @required List<String> knownExperimentsKeys,
-  }) async {
-    final params = {
-      'knownKeys': knownExperimentsKeys,
-    };
-    final headers = {
+    String deviceId,
+    String appsFlyerId,
+    String amplitudeDeviceId,
+  }) {
+    assert(sdkToken != null);
+    assert(appId != null);
+
+    final jwt = _generateJwt(
+      sdkToken: sdkToken,
+      amplitudeDeviceId: amplitudeDeviceId,
+      appsFlyerId: appsFlyerId,
+      deviceId: deviceId,
+    );
+    _headers = {
       'Authorization': 'Bearer $jwt',
       'SDK-App-ID': appId,
     };
-    final uri = Uri.https(_domain, _endpoint, params);
-    final response = await http.get(uri, headers: headers);
+  }
 
-    // TODO: Process errors
+  Future<Map<String, dynamic>> loadExperiments({
+    @required List<String> knownExperimentsKeys,
+  }) async {
+    final params = {'knownKeys': knownExperimentsKeys};
+    final uri = Uri.https(_domain, _endpoint, params);
+    final response = await http.get(uri, headers: _headers);
+
     if (response.statusCode != 200) _throwError(response);
 
-    return jsonDecode(response.body)["experiments"];
+    return Map<String, dynamic>.from(jsonDecode(response.body));
   }
 
   void _throwError(http.Response response) {
@@ -31,6 +46,6 @@ class _Client {
       Status Code: ${response.statusCode}.
       Body: ${response.body}.
     """;
-    throw(message);
+    throw (message);
   }
 }
