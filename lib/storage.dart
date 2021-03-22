@@ -15,9 +15,9 @@ class _Storage {
       _prefs.setString(_deviceIdPrefsKey, deviceId);
   String readDeviceId() => _prefs.getString(_deviceIdPrefsKey);
 
-  void writeExperimentsDefaults(Map<String, String> defaults) {
-    if (defaults?.isEmpty ?? true) return;
-    _prefs.setString(_defaultsPrefsKey, jsonEncode(defaults));
+  void writeExperimentsDefaults(Map<String, String> experiments) {
+    if (experiments?.isEmpty ?? true) return;
+    _prefs.setString(_defaultsPrefsKey, jsonEncode(experiments));
   }
 
   Map<String, String> readExperimentsDefaults() {

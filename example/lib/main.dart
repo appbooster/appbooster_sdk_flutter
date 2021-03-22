@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:appbooster_sdk_flutter/appbooster_sdk_flutter.dart';
+import 'package:pretty_json/pretty_json.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,26 +28,25 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _experimentsValues = "—";
-  bool _sdkInitialized = false;
-
   Future<void> _initializeSdk() async {
     await Appbooster.initialize(
       appId: "16897",
       sdkToken: "E44A1C2E762B41A691494FAB045993DF",
       defaults: {"flutter_test": "green"},
     );
-    setState(() {
-      _sdkInitialized = true;
-      _experimentsValues = Appbooster.instance().experiments.toString();
-    });
+    setState(() {});
   }
 
   Future<void> _fetchExperiments() async {
     await Appbooster.instance().loadExperiments();
-    setState(() {
-      _experimentsValues = Appbooster.instance().experiments.toString();
-    });
+    setState(() {});
+  }
+
+  bool _sdkInitialized() => Appbooster.instance() != null;
+
+  String _experimentsStr(Map experiments) {
+    if (experiments == null) return '—';
+    return "\n${prettyJson(experiments, indent: 2)}";
   }
 
   @override
@@ -54,19 +55,35 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('Appbooster SDK Test'),
       ),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: _sdkInitialized ? null : _initializeSdk,
-              child: Text('Initialize SDK'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _sdkInitialized() ? null : _initializeSdk,
+                  child: Text('Initialize SDK'),
+                ),
+                ElevatedButton(
+                  onPressed: _sdkInitialized() ? _fetchExperiments : null,
+                  child: Text('Fetch Experiments'),
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: _sdkInitialized ? _fetchExperiments : null,
-              child: Text('Fetch Experiments'),
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Text(
+                  "Current experiments values: ${_experimentsStr(Appbooster.instance()?.experiments)}"),
             ),
-            Text("Current experiments values: $_experimentsValues"),
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Text(
+                  "Current detailed experiments values: ${_experimentsStr(Appbooster.instance()?.experimentsWithDetails)}"),
+            ),
           ],
         ),
       ),

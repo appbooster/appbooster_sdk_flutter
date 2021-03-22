@@ -4,7 +4,7 @@ class _Client {
   static const _domain = 'api.appbooster.com';
   static const _endpoint = '/api/mobile/experiments';
 
-  Future<Map<String, String>> loadExperiments({
+  Future<Iterable> loadExperiments({
     @required String appId,
     @required String jwt,
     @required List<String> knownExperimentsKeys,
@@ -20,15 +20,17 @@ class _Client {
     final response = await http.get(uri, headers: headers);
 
     // TODO: Process errors
-    if (response.statusCode != 200) return null;
+    if (response.statusCode != 200) _throwError(response);
 
-    final experimentsData = jsonDecode(response.body)["experiments"];
+    return jsonDecode(response.body)["experiments"];
+  }
 
-    return Map.unmodifiable(
-      Map.fromEntries(
-        experimentsData.map<MapEntry<String, String>>(
-            (e) => MapEntry(e['key'] as String, e['value'] as String)),
-      ),
-    );
+  void _throwError(http.Response response) {
+    final message = """
+      Appbooster SDK request error.
+      Status Code: ${response.statusCode}.
+      Body: ${response.body}.
+    """;
+    throw(message);
   }
 }

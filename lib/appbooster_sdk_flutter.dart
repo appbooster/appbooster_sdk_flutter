@@ -24,6 +24,7 @@ class Appbooster {
 
   String _jwt;
   Map<String, String> _experiments;
+  Map<String, String> _detailedExperiments;
   _Storage _storage = _Storage();
   _Client _client = _Client();
 
@@ -70,20 +71,23 @@ class Appbooster {
     assert(_defaultExperiments.isNotEmpty);
   }
 
-  factory Appbooster.instance() {
-    assert(_instance != null, 'Appbooster SDK must be initialized.');
-    return _instance;
-  }
+  factory Appbooster.instance() => _instance;
 
   Map<String, String> get experiments => _experiments ?? _defaultExperiments;
+  Map<String, String> get experimentsWithDetails => _detailedExperiments;
+  String experiment(String key) => experiments[key];
 
   Future<void> loadExperiments() async {
-    _experiments = await _client.loadExperiments(
+    final loadedExperiments = await _client.loadExperiments(
       appId: _appId,
       jwt: _jwt,
       knownExperimentsKeys: _defaultExperiments.keys.toList(),
     );
+    if (loadedExperiments?.isEmpty ?? true) return;
+
+    _experiments = _extractExperiments(loadedExperiments);
     _storage.writeExperimentsDefaults(_experiments);
+    _detailedExperiments = _extractDetailedExperiments(loadedExperiments);
   }
 
   void _fetchAbsentParams() {
@@ -94,8 +98,9 @@ class Appbooster {
       appsFlyerId: _appsFlyerId,
       deviceId: _deviceId,
     );
-
     _restoreDefaultExperiments();
+    _detailedExperiments =
+        _extractDefaultDetailedExperiments(_defaultExperiments);
   }
 
   String _fetchDeviceId() {
@@ -111,5 +116,34 @@ class Appbooster {
     final defaults = _storage.readExperimentsDefaults();
     if (defaults?.isEmpty ?? true) return;
     _defaultExperiments = defaults;
+  }
+
+  Map<String, String> _extractExperiments(Iterable loadedExperiments) {
+    return Map.unmodifiable(
+      Map.fromEntries(
+        loadedExperiments.map<MapEntry<String, String>>(
+            (e) => MapEntry(e['key'] as String, e['value'] as String)),
+      ),
+    );
+  }
+
+  Map<String, String> _extractDetailedExperiments(Iterable loadedExperiments) {
+    final detailed = <MapEntry<String, String>>[];
+    loadedExperiments.forEach((experiment) {
+      detailed.add(MapEntry("[Appbooster] ${experiment['key'] as String}",
+          experiment['value'] as String));
+      detailed.add(MapEntry(
+          "[Appbooster] [internal] ${experiment['key'] as String}",
+          experiment['optionId'].toString()));
+    });
+
+    return Map.unmodifiable(Map.fromEntries(detailed));
+  }
+
+  Map<String, String> _extractDefaultDetailedExperiments(Map experiments) {
+    return Map.unmodifiable(
+      Map.fromEntries(experiments.entries.map<MapEntry<String, String>>(
+          (e) => MapEntry("[Appbooster] ${e.key}", e.value))),
+    );
   }
 }
