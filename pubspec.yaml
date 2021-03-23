@@ -15,6 +15,7 @@ dependencies:
   uuid: 2.2.2
   http: ^0.13.0
   dart_jsonwebtoken: 1.6.2
+  shake: ^1.0.0
 
 dev_dependencies:
   flutter_test:

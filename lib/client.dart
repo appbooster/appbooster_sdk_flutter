@@ -1,8 +1,9 @@
 part of appbooster_sdk_flutter;
 
 class _Client {
-  static const _domain = 'api.appbooster.com';
-  static const _endpoint = '/api/mobile/experiments';
+  static const _host = 'api.appbooster.com';
+  static const _experimentsEndpoint = '/api/mobile/experiments';
+  static const _experimentsOptionsEndpoint = '/api/mobile/experiments/options';
 
   Map<String, String> _headers;
 
@@ -31,13 +32,38 @@ class _Client {
   Future<Map<String, dynamic>> loadExperiments({
     @required List<String> knownExperimentsKeys,
   }) async {
-    final params = {'knownKeys': knownExperimentsKeys};
-    final uri = Uri.https(_domain, _endpoint, params);
+    final result = await _performRequest(
+      endpoint: _experimentsEndpoint,
+      knownExperimentsKeys: knownExperimentsKeys,
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  Future<List<Map<String, dynamic>>> loadExperimentsOptions({
+    @required List<String> knownExperimentsKeys,
+  }) async {
+    final result = await _performRequest(
+      endpoint: _experimentsOptionsEndpoint,
+      knownExperimentsKeys: knownExperimentsKeys,
+    );
+    return List<Map<String, dynamic>>.from(result['experiments']);
+  }
+
+  Future<dynamic> _performRequest({
+    @required String endpoint,
+    @required List<String> knownExperimentsKeys,
+  }) async {
+    final uri = Uri(
+      scheme: 'https',
+      host: _host,
+      path: endpoint,
+      query: knownExperimentsKeys.map<String>((k) => "knownKeys[]=$k").join('&')
+    );
     final response = await http.get(uri, headers: _headers);
 
     if (response.statusCode != 200) _throwError(response);
 
-    return Map<String, dynamic>.from(jsonDecode(response.body));
+    return jsonDecode(response.body);
   }
 
   void _throwError(http.Response response) {

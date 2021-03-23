@@ -28,11 +28,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _debugOnShake = false;
+
   Future<void> _initializeSdk() async {
     await Appbooster.initialize(
       appId: "16897",
       sdkToken: "E44A1C2E762B41A691494FAB045993DF",
-      defaults: {"flutter_test": "green"},
+      defaults: {"flutter_test": "green", "test_experiment": "value_1"},
     );
     setState(() {});
   }
@@ -49,8 +51,32 @@ class _MyHomePageState extends State<MyHomePage> {
     return "\n${prettyJson(experiments, indent: 2)}";
   }
 
+  bool _isDebugAllowed() => Appbooster.instance()?.isDebugAllowed ?? false;
+
+  void _showDebug(BuildContext context) {
+    Appbooster.instance().showDebugLayer(
+      context: context,
+      valuesChangedCallback: (_) => setState(() {}),
+    );
+  }
+
+  void _toggleDebugOnShake(BuildContext context, bool enabled) {
+    if (enabled) {
+      Appbooster.instance().enableDebugOnShake(
+        context: context,
+        valuesChangedCallback: (_) => setState(() {}),
+      );
+    } else {
+      Appbooster.instance().disableDebugOnShake();
+    }
+    setState(() {
+      _debugOnShake = enabled;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Appbooster SDK Test'),
@@ -61,8 +87,9 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              direction: Axis.horizontal,
               children: [
                 ElevatedButton(
                   onPressed: _sdkInitialized() ? null : _initializeSdk,
@@ -72,6 +99,30 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: _sdkInitialized() ? _fetchExperiments : null,
                   child: Text('Fetch Experiments'),
                 ),
+                ElevatedButton(
+                  onPressed:
+                      _isDebugAllowed() ? () => _showDebug(context) : null,
+                  child: Text('Show debug'),
+                ),
+                IgnorePointer(
+                  ignoring: !_isDebugAllowed(),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: _debugOnShake,
+                        onChanged: (value) =>
+                            _toggleDebugOnShake(context, value),
+                      ),
+                      Text(
+                        'Use shake',
+                        style: theme.textTheme.button.copyWith(
+                            color: _isDebugAllowed()
+                                ? Colors.black87
+                                : Colors.black26),
+                      ),
+                    ],
+                  ),
+                )
               ],
             ),
             Padding(

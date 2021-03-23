@@ -1,7 +1,10 @@
 library appbooster_sdk_flutter;
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shake/shake.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
@@ -12,15 +15,18 @@ part 'storage.dart';
 part 'jwt.dart';
 part 'debug.dart';
 part 'experiments.dart';
+part 'debug_widget.dart';
+
+typedef void DebugCallback(List<String> changedKeys);
 
 class Appbooster {
   static Appbooster _instance;
 
-  bool _usingShake;
   _Storage _storage = _Storage();
   _Client _client;
   _Experiments _experiments;
   _AppboosterDebug _debug;
+  bool _isDebugAllowed = false;
 
   static Future<void> initialize({
     @required String sdkToken,
@@ -28,42 +34,90 @@ class Appbooster {
     String deviceId,
     String appsFlyerId,
     String amplitudeDeviceId,
-    bool usingShake,
     @required Map<String, String> defaults,
   }) async {
     assert(_instance == null, 'Appbooster SDK is already initialized.');
 
-    _instance ??= Appbooster._internal(usingShake: usingShake);
-    await _instance._storage.initialize();
-    _instance._experiments = _Experiments(
-      storage: _instance._storage,
+    final instance = Appbooster._internal();
+    await instance._storage.initialize();
+    instance._experiments = _Experiments(
+      storage: instance._storage,
       defaults: defaults,
     );
-    deviceId ??= _instance._fetchDeviceId();
-    _instance._client = _Client(
+    deviceId ??= instance._fetchDeviceId();
+    instance._client = _Client(
       appId: appId,
       sdkToken: sdkToken,
       deviceId: deviceId,
       appsFlyerId: appsFlyerId,
       amplitudeDeviceId: amplitudeDeviceId,
     );
+    _instance = instance;
   }
 
-  Appbooster._internal({bool usingShake}) : _usingShake = usingShake ?? true;
+  Appbooster._internal();
   factory Appbooster.instance() => _instance;
 
-  Map<String, String> get experiments =>
-      _experiments.experiments ?? _experiments.defaultExperiments;
+  bool get isDebugAllowed => _isDebugAllowed;
+
+  Map<String, String> get experiments {
+    final current = _experiments.experiments ?? _experiments.defaultExperiments;
+    if (!isDebugAllowed) {
+      return current;
+    }
+    return Map.unmodifiable(Map.from(current)..addAll(_debug.debugExperiments));
+  }
+
   Map<String, String> get experimentsWithDetails =>
       _experiments.detailedExperiments;
-  String experiment(String key) => experiments[key];
+  String experiment(String key) => _isDebugAllowed
+      ? _debug.debugExperiments[key] ?? experiments[key]
+      : experiments[key];
+
+  Future<void> showDebugLayer({
+    @required BuildContext context,
+    DebugCallback valuesChangedCallback,
+  }) async {
+    assert(isDebugAllowed);
+    if (!_isDebugAllowed) return;
+
+    return _debug.showDebugLayer(
+      context: context,
+      valuesChangedCallback: valuesChangedCallback,
+      experiments: _experiments.experiments,
+    );
+  }
+
+  void enableDebugOnShake({
+    @required BuildContext context,
+    DebugCallback valuesChangedCallback,
+  }) {
+    assert(isDebugAllowed);
+    if (!_isDebugAllowed) return;
+
+    _debug.enableDebugOnShake(
+      context: context,
+      valuesChangedCallback: valuesChangedCallback,
+      experiments: _experiments.experiments,
+    );
+  }
+
+  void disableDebugOnShake() {
+    assert(isDebugAllowed);
+    if (!_isDebugAllowed) return;
+
+    _debug.disableDebugOnShake();
+  }
 
   Future<void> loadExperiments() async {
     final loadedData = await _client.loadExperiments(
         knownExperimentsKeys: experiments.keys.toList(growable: false));
 
-    if (loadedData['meta']['debug'] && _debug == null) {
-      _debug = _AppboosterDebug(client: _client, useShake: _usingShake);
+    _isDebugAllowed = loadedData['meta']['debug'];
+    if (_isDebugAllowed) {
+      _debug ??= _AppboosterDebug(client: _client);
+    } else {
+      _debug?.disableDebugOnShake();
     }
 
     final loadedExperiments = loadedData['experiments'];

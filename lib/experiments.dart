@@ -10,24 +10,30 @@ class _Experiments {
   _Experiments({
     @required _Storage storage,
     @required Map<String, String> defaults,
-  })  : _storage = storage,
-        defaultExperiments = Map.unmodifiable(defaults ?? const {}) {
+  }) : _storage = storage {
     assert(_storage != null);
-    assert(defaultExperiments.isNotEmpty);
+    assert(defaults?.isNotEmpty ?? false);
+    defaultExperiments = Map.unmodifiable(defaults ?? const {});
+    detailedExperiments =
+        _extractDefaultDetailedExperiments(defaultExperiments);
     _restoreDefaultExperiments();
   }
 
   void update(Iterable loadedExperiments) {
     experiments = _extractExperiments(loadedExperiments);
-    _storage.writeExperimentsDefaults(experiments);
+    _storage?.writeExperimentsDefaults(experiments);
     detailedExperiments = _extractDetailedExperiments(loadedExperiments);
   }
 
   void _restoreDefaultExperiments() {
-    final defaults = _storage.readExperimentsDefaults();
+    final defaults = _storage?.readExperimentsDefaults();
     if (defaults?.isEmpty ?? true) return;
-    defaultExperiments = defaults;
-    detailedExperiments = _extractDefaultDetailedExperiments(defaults);
+    defaultExperiments = Map.unmodifiable(<String, String>{
+      ...defaultExperiments,
+      ...defaults,
+    });
+    detailedExperiments =
+        _extractDefaultDetailedExperiments(defaultExperiments);
   }
 
   Map<String, String> _extractExperiments(Iterable loadedExperiments) {
