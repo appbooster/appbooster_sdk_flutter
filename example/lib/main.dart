@@ -28,13 +28,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  static const _experimentsDefaults = {"flutter_test": "green", "test_experiment": "value_1"};
   bool _debugOnShake = false;
 
   Future<void> _initializeSdk() async {
     await Appbooster.initialize(
       appId: "16897",
       sdkToken: "E44A1C2E762B41A691494FAB045993DF",
-      defaults: {"flutter_test": "green", "test_experiment": "value_1"},
+      defaults: _experimentsDefaults,
     );
     setState(() {});
   }
@@ -87,6 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text("Defaults:\n${_experimentsDefaults.toString()}", style: theme.textTheme.subhead,),
+            ),
             Wrap(
               alignment: WrapAlignment.spaceEvenly,
               direction: Axis.horizontal,
