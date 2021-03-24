@@ -1,6 +1,4 @@
-![Bintray](https://img.shields.io/bintray/v/appbooster/appbooster_android_sdk/experiments_sdk?color=dark%20green&style=flat-square)
-
-# appbooster-sdk-android
+# appbooster_sdk_flutter
 
 Mobile framework for Appbooster platform.
 
