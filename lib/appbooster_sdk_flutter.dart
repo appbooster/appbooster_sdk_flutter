@@ -17,7 +17,7 @@ part 'debug.dart';
 part 'experiments.dart';
 part 'debug_widget.dart';
 
-typedef void DebugCallback(List<String> changedKeys);
+typedef void ExperimentsChangedCallback(List<String> changedKeys);
 
 class Appbooster {
   static Appbooster _instance;
@@ -76,7 +76,7 @@ class Appbooster {
 
   Future<void> showDebugLayer({
     @required BuildContext context,
-    DebugCallback valuesChangedCallback,
+    ExperimentsChangedCallback valuesChangedCallback,
   }) async {
     assert(isDebugAllowed);
     if (!_isDebugAllowed) return;
@@ -90,7 +90,7 @@ class Appbooster {
 
   void enableDebugOnShake({
     @required BuildContext context,
-    DebugCallback valuesChangedCallback,
+    ExperimentsChangedCallback valuesChangedCallback,
   }) {
     assert(isDebugAllowed);
     if (!_isDebugAllowed) return;
@@ -109,7 +109,7 @@ class Appbooster {
     _debug.disableDebugOnShake();
   }
 
-  Future<void> loadExperiments() async {
+  Future<void> loadExperiments([ExperimentsChangedCallback callback]) async {
     final loadedData = await _client.loadExperiments(
         knownExperimentsKeys: experiments.keys.toList(growable: false));
 
@@ -124,6 +124,9 @@ class Appbooster {
     if (loadedExperiments?.isEmpty ?? true) return;
 
     _experiments.update(loadedExperiments);
+    if (callback != null) {
+      callback(experiments.keys.toList(growable: false));
+    }
   }
 
   String _fetchDeviceId() {

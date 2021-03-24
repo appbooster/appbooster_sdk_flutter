@@ -17,7 +17,7 @@ class _AppboosterDebug {
 
   void enableDebugOnShake({
     @required BuildContext context,
-    DebugCallback valuesChangedCallback,
+    ExperimentsChangedCallback valuesChangedCallback,
     Map<String, String> experiments,
   }) {
     _shakeDetector?.stopListening();
@@ -39,7 +39,7 @@ class _AppboosterDebug {
 
   Future<void> showDebugLayer({
     @required BuildContext context,
-    DebugCallback valuesChangedCallback,
+    ExperimentsChangedCallback valuesChangedCallback,
     Map<String, String> experiments,
   }) async {
     if (_debugLayerShown) return;

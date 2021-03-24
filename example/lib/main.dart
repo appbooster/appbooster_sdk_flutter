@@ -46,12 +46,13 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() => _showProgress = false);
   }
 
-  Future<void> _fetchExperiments() async {
+  void _fetchExperiments() {
     if (_showProgress) return;
     setState(() => _showProgress = true);
-    await Appbooster.instance().loadExperiments();
-    if (!mounted) return;
-    setState(() => _showProgress = false);
+    Appbooster.instance().loadExperiments((_) {
+      if (!mounted) return;
+      setState(() => _showProgress = false);
+    });
   }
 
   bool _sdkInitialized() => Appbooster.instance() != null;

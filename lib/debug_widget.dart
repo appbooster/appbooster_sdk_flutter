@@ -7,7 +7,7 @@ class _DebugWidget extends StatefulWidget {
   final Map<String, String> _experiments;
   final Function(bool loaded) _optionsLoadedSetter;
   final Function _experimentsOptionsLoader;
-  final DebugCallback _valuesChangedCallback;
+  final ExperimentsChangedCallback _valuesChangedCallback;
 
   _DebugWidget({
     @required bool isOptionsLoaded,
