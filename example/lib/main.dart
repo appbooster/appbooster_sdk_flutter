@@ -28,21 +28,30 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const _experimentsDefaults = {"flutter_test": "green", "test_experiment": "value_1"};
+  static const _experimentsDefaults = {
+    "flutter_test": "green",
+    "test_experiment": "value_1"
+  };
   bool _debugOnShake = false;
+  bool _showProgress = false;
 
   Future<void> _initializeSdk() async {
+    setState(() => _showProgress = true);
     await Appbooster.initialize(
       appId: "16897",
       sdkToken: "E44A1C2E762B41A691494FAB045993DF",
       defaults: _experimentsDefaults,
     );
-    setState(() {});
+    if (!mounted) return;
+    setState(() => _showProgress = false);
   }
 
   Future<void> _fetchExperiments() async {
+    if (_showProgress) return;
+    setState(() => _showProgress = true);
     await Appbooster.instance().loadExperiments();
-    setState(() {});
+    if (!mounted) return;
+    setState(() => _showProgress = false);
   }
 
   bool _sdkInitialized() => Appbooster.instance() != null;
@@ -80,7 +89,15 @@ class _MyHomePageState extends State<MyHomePage> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Appbooster SDK Test'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(child: Text('Appbooster SDK Test')),
+            if (_showProgress)
+              CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+          ],
+        ),
       ),
       body: Container(
         padding: const EdgeInsets.all(16),
@@ -90,7 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text("Defaults:\n${_experimentsDefaults.toString()}", style: theme.textTheme.subhead,),
+              child: Text(
+                "Defaults:\n${_experimentsDefaults.toString()}",
+                style: theme.textTheme.subtitle1,
+              ),
             ),
             Wrap(
               alignment: WrapAlignment.spaceEvenly,

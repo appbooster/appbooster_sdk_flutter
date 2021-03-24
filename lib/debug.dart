@@ -4,6 +4,7 @@ class _AppboosterDebug {
   _Client _client;
   bool _isOptionsLoaded = false;
   ShakeDetector _shakeDetector;
+  bool _debugLayerShown = false;
 
   List<Map<String, dynamic>> _experimentsOptions = [];
   Map<String, String> debugExperiments = {};
@@ -20,12 +21,14 @@ class _AppboosterDebug {
     Map<String, String> experiments,
   }) {
     _shakeDetector?.stopListening();
-    _shakeDetector = ShakeDetector.waitForStart(
-      onPhoneShake: () => showDebugLayer(
-        context: context,
-        experiments: experiments,
-        valuesChangedCallback: valuesChangedCallback,
-      ),
+    _shakeDetector = ShakeDetector.autoStart(
+      onPhoneShake: () {
+        showDebugLayer(
+          context: context,
+          experiments: experiments,
+          valuesChangedCallback: valuesChangedCallback,
+        );
+      },
     );
   }
 
@@ -39,7 +42,10 @@ class _AppboosterDebug {
     DebugCallback valuesChangedCallback,
     Map<String, String> experiments,
   }) async {
-    showModalBottomSheet(
+    if (_debugLayerShown) return;
+
+    _debugLayerShown = true;
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
@@ -54,5 +60,6 @@ class _AppboosterDebug {
         );
       },
     );
+    _debugLayerShown = false;
   }
 }
