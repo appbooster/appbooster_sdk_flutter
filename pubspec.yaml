@@ -1,8 +1,8 @@
 name: appbooster_sdk_flutter
 description: Mobile framework for Appbooster platform.
-version: 0.0.1
-author:
-homepage:
+version: 1.0.0
+maintainer: Alexey Tikhomirov (https://github.com/alex-thmv)
+homepage: https://appbooster.com
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -12,10 +12,11 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.0.5
-  uuid: 2.2.2
+  uuid: ^2.2.2
   http: ^0.13.0
-  dart_jsonwebtoken: 1.6.2
+  dart_jsonwebtoken: ^1.6.2
   shake: ^1.0.0
+  meta: ^1.3.0
 
 dev_dependencies:
   flutter_test:
