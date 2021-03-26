@@ -33,7 +33,7 @@ class Appbooster {
     @required String appId,
     String deviceId,
     String appsFlyerId,
-    String amplitudeDeviceId,
+    String amplitudeUserId,
     @required Map<String, String> defaults,
   }) async {
     assert(_instance == null, 'Appbooster SDK is already initialized.');
@@ -50,7 +50,7 @@ class Appbooster {
       sdkToken: sdkToken,
       deviceId: deviceId,
       appsFlyerId: appsFlyerId,
-      amplitudeDeviceId: amplitudeDeviceId,
+      amplitudeUserId: amplitudeUserId,
     );
     _instance = instance;
   }

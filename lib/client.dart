@@ -12,14 +12,14 @@ class _Client {
     @required String appId,
     String deviceId,
     String appsFlyerId,
-    String amplitudeDeviceId,
+    String amplitudeUserId,
   }) {
     assert(sdkToken != null);
     assert(appId != null);
 
     final jwt = _generateJwt(
       sdkToken: sdkToken,
-      amplitudeDeviceId: amplitudeDeviceId,
+      amplitudeUserId: amplitudeUserId,
       appsFlyerId: appsFlyerId,
       deviceId: deviceId,
     );
