@@ -13,6 +13,7 @@ class _Client {
     String deviceId,
     String appsFlyerId,
     String amplitudeUserId,
+    Map<String, dynamic> deviceProperties,
   }) {
     assert(sdkToken != null);
     assert(appId != null);
@@ -22,6 +23,7 @@ class _Client {
       amplitudeUserId: amplitudeUserId,
       appsFlyerId: appsFlyerId,
       deviceId: deviceId,
+      deviceProperties: deviceProperties,
     );
     _headers = {
       'Authorization': 'Bearer $jwt',
