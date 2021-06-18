@@ -32,6 +32,9 @@ class _MyHomePageState extends State<MyHomePage> {
     "flutter_test": "green",
     "test_experiment": "value_1"
   };
+  static const _deviceProperties = {
+    "installedAt": "2021-05-20T09:55:05.000+03:00",
+  };
   bool _debugOnShake = false;
   bool _showProgress = false;
 
@@ -41,6 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appId: "16897",
       sdkToken: "E44A1C2E762B41A691494FAB045993DF",
       defaults: _experimentsDefaults,
+      deviceProperties: _deviceProperties,
     );
     if (!mounted) return;
     setState(() => _showProgress = false);
@@ -110,6 +114,13 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text(
                 "Defaults:\n${_experimentsDefaults.toString()}",
+                style: theme.textTheme.subtitle1,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                "deviceProperties:\n${_deviceProperties.toString()}",
                 style: theme.textTheme.subtitle1,
               ),
             ),

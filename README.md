@@ -28,6 +28,7 @@ Mobile framework for Appbooster platform.
       appsFlyerId: "${YOUR_APPS_FLYER_UID}" // optional
       amplitudeUserId: "${YOUR_AMPLITUDE_USER_ID}" // optional, if Amplitude integration is needed
       defaults: {"${TEST_1_KEY}": "${TEST_1_DEFAULT_VALUE}", "${TEST_2_KEY}": "${TEST_2_DEFAULT_VALUE}"},
+      deviceProperties: {"installedAt": "2021-05-20T09:55:05.000+03:00"}, // optional, additional information about device
     );
 ```
 

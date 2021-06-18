@@ -1,1 +1,3 @@
-## [1.0.0] - 26/03/2021
+## [1.0.2] - 18/06/2021
+
+* deviceProperties added to Appbooster.initialize.
